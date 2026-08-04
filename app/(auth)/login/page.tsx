@@ -1,7 +1,24 @@
+"use client"
+
 import AuthForm from "@/features/auth/components/AuthForm";
 import InputField from "@/features/auth/components/InputField";
+import loginSchema, { LoginFormInputs } from "@/features/auth/schema/loginSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 const LoginPage = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormInputs>({
+    resolver: zodResolver(loginSchema),
+  }); 
+
+  const onSubmit = async (data: LoginFormInputs) => {
+    console.log("Data yang siap dikirim ke Supabase:", data);
+  };
+
   return (
     <AuthForm
       title="Welcome back"
@@ -15,21 +32,25 @@ const LoginPage = () => {
       footerLinkText="Sign up now"
       footerLinkHref="/register"
     >
-      <form className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <InputField 
           label="Email address" 
           type="email" 
           placeholder="name@example.com" 
+          registration={register("email")}
+          error={errors.email}
         />
         
         <InputField 
           label="Password" 
           type="password" 
           placeholder="••••••••" 
+          registration={register("password")}
+          error={errors.password}
         />
         
-        <button className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 mt-6">
-          Sign In
+        <button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 mt-6">
+          {isSubmitting ? "Signing In..." : "Sign In"}
         </button>
       </form>
     </AuthForm>
