@@ -4,10 +4,15 @@ import AuthForm from "@/features/auth/components/AuthForm";
 import InputField from "@/features/auth/components/InputField";
 import { RegisterFormInputs } from "@/features/auth/schema/registerSchema";
 import registerSchema from "@/features/auth/schema/registerSchema";
+import { authService } from "@/features/auth/services/authService";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const RegisterPage = () => {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -17,7 +22,14 @@ const RegisterPage = () => {
   }); 
 
   const onSubmit = async (data: RegisterFormInputs) => {
-    console.log("Data yang siap dikirim ke Supabase:", data);
+    try {
+      await authService.register(data);
+      router.push("/login")
+      toast.success("Pendaftaran berhasil!")
+    } catch (error: any) {
+      console.error(error.message);
+      toast.error(error.message);
+    }
   };
 
   return (
