@@ -1,8 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
 import { LoginFormInputs } from "../schema/loginSchema";
 import { RegisterFormInputs } from "../schema/registerSchema";
+import { createBrowserClient } from "@supabase/ssr";
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+);
 
 export const authService = {
   async login(data: LoginFormInputs) {
@@ -31,6 +34,11 @@ export const authService = {
       },
     });
     if (error) throw new Error(error.message);
+    return true;
+  },
+
+  async logout() {
+    await supabase.auth.signOut();
     return true;
   }
 };

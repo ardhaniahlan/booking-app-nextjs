@@ -25,11 +25,12 @@ const LoginPage = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       const role = await authService.login(data);
-
+      router.refresh();
+      
       if (role === "admin") {
-        router.push("/admin/dashboard");
+        router.replace("/admin/dashboard");
       } else {
-        router.push("/dashboard");
+        router.replace("/dashboard");
       }
     } catch (error: any) {
       console.error(error.message);
