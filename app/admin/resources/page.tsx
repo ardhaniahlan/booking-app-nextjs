@@ -4,7 +4,8 @@ import { CreateResourceModal } from "@/features/admin/resources/components/Creat
 import { EditResourceModal } from "@/features/admin/resources/components/EditResourceModal";
 import { Resource } from "@/features/admin/resources/types/resource.types";
 import { createBrowserClient } from "@supabase/ssr";
-import { Edit, Filter, Plus, Search, Trash2 } from "lucide-react";
+import { CalendarDays, Edit, Filter, Plus, Search, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -13,7 +14,7 @@ const ResourcePage = () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
-  
+
   const [resources, setResources] = useState<Resource[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
@@ -62,14 +63,16 @@ const ResourcePage = () => {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus resource "${name}"?`)) {
+    if (
+      !window.confirm(`Apakah Anda yakin ingin menghapus resource "${name}"?`)
+    ) {
       return;
     }
 
     try {
       const { error } = await supabase.from("resources").delete().eq("id", id);
       if (error) throw error;
-      
+
       fetchResources();
     } catch (error: any) {
       console.error("Gagal menghapus:", error.message);
@@ -86,8 +89,8 @@ const ResourcePage = () => {
       />
 
       <EditResourceModal
-        isOpen={!!editingResource} 
-        onClose={() => setEditingResource(null)} 
+        isOpen={!!editingResource}
+        onClose={() => setEditingResource(null)}
         onSuccess={fetchResources}
         resource={editingResource}
       />
@@ -213,14 +216,21 @@ const ResourcePage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
+                      <Link
+                        href={`/admin/resources/${res.id}`}
+                        className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
+                        title="Manage Schedule & Details"
+                      >
+                        <CalendarDays className="w-4 h-4" />
+                      </Link>
+                      <button
                         onClick={() => setEditingResource(res)}
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                         title="Edit Resource"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(res.id, res.name)}
                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                         title="Delete Resource"
