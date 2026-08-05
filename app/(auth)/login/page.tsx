@@ -10,9 +10,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useAuthStore } from "@/features/auth/store/authStore";
 
 const LoginPage = () => {
   const router = useRouter();
+
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
@@ -24,9 +27,17 @@ const LoginPage = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const role = await authService.login(data);
+      const {user, role} = await authService.login(data);
+      setAuth(
+        {
+          id: user.id,
+          email: user.email!,
+          full_name: user.user_metadata?.full_name, 
+        },
+        role
+      );
       router.refresh();
-      
+
       if (role === "admin") {
         router.replace("/admin/dashboard");
       } else {

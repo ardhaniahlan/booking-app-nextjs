@@ -22,7 +22,10 @@ export const authService = {
       .single();
 
     if (profileError) throw new Error("Gagal mengambil profil pengguna");
-    return profile.role;
+    return {
+      user: authData.user,
+      role: profile?.role
+    };
   },
 
   async register(data: RegisterFormInputs) {
