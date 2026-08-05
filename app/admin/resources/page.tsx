@@ -19,6 +19,18 @@ const ResourcePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
 
+  const totalAssets = resources.length;
+  const activeAssets = resources.filter((res) => res.is_active).length;
+  const offlineAssets = totalAssets - activeAssets;
+  const utilizationPercentage =
+    totalAssets === 0 ? 0 : Math.round((activeAssets / totalAssets) * 100);
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const newThisWeek = resources.filter(
+    (res) => new Date(res.created_at) >= oneWeekAgo,
+  ).length;
+
   const fetchResources = async () => {
     const { data, error } = await supabase
       .from("resources")
@@ -131,24 +143,27 @@ const ResourcePage = () => {
               Total Assets
             </h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black text-slate-900">1,248</span>
+              <span className="text-5xl font-black text-slate-900">
+                {totalAssets}
+              </span>
               <span className="text-sm font-medium text-blue-600">
-                +12 this week
+                +{newThisWeek} this week
               </span>
             </div>
           </div>
-
           <div className="bg-[#242f3e] p-6 rounded-2xl text-white">
             <h3 className="text-xs font-bold text-slate-400 tracking-wider mb-4 uppercase">
               Utilization
             </h3>
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full border-4 border-slate-600 border-t-amber-400 flex items-center justify-center">
-                <span className="font-bold">85%</span>
+                <span className="font-bold">{utilizationPercentage}%</span>
               </div>
               <div>
                 <p className="font-bold text-lg">Active</p>
-                <p className="text-sm text-slate-400">188 offline</p>
+                <p className="text-sm text-slate-400">
+                  {offlineAssets} offline
+                </p>
               </div>
             </div>
           </div>
