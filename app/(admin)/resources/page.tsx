@@ -306,7 +306,7 @@ const ResourcePage = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          href={`/admin/resources/${res.id}`}
+                          href={`/resources/${res.id}`}
                           className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition"
                           title="Manage Schedule & Details"
                         >
