@@ -1,18 +1,22 @@
 "use client";
 
 import { CreateResourceModal } from "@/features/admin/resources/components/CreateResourceModal";
+import { EditResourceModal } from "@/features/admin/resources/components/EditResourceModal";
 import { Resource } from "@/features/admin/resources/types/resource.types";
 import { createBrowserClient } from "@supabase/ssr";
-import { Filter, Plus, Search } from "lucide-react";
+import { Edit, Filter, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const ResourcePage = () => {
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
+  
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
 
   const fetchResources = async () => {
     const { data, error } = await supabase
@@ -57,12 +61,35 @@ const ResourcePage = () => {
     }
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus resource "${name}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("resources").delete().eq("id", id);
+      if (error) throw error;
+      
+      fetchResources();
+    } catch (error: any) {
+      console.error("Gagal menghapus:", error.message);
+      toast.error("Gagal menghapus data.");
+    }
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto text-slate-800">
       <CreateResourceModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchResources}
+      />
+
+      <EditResourceModal
+        isOpen={!!editingResource} 
+        onClose={() => setEditingResource(null)} 
+        onSuccess={fetchResources}
+        resource={editingResource}
       />
 
       <div className="flex justify-between items-end mb-8">
@@ -183,6 +210,24 @@ const ResourcePage = () => {
                         className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${res.is_active ? "translate-x-6" : "translate-x-0"}`}
                       />
                     </button>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        onClick={() => setEditingResource(res)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="Edit Resource"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(res.id, res.name)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                        title="Delete Resource"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
