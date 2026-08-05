@@ -19,16 +19,19 @@ const ResourcePage = () => {
       .from("resources")
       .select(
         `
-        id, name, category, capacity, is_active, created_at,
+        id, name, category, capacity, is_active, created_by, created_at,
         profiles(full_name) 
       `,
       )
       .order("created_at", { ascending: false });
 
+    console.log("Supabase Data:", data);
+    console.log("Supabase Error:", error);
+
     if (error) {
       console.error("Gagal menarik data:", error.message);
     } else if (data) {
-      setResources(data);
+      setResources(data as unknown as Resource[]);
     }
   };
 
@@ -165,7 +168,7 @@ const ResourcePage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm font-bold text-slate-900">
-                      {res.profiles?.[0]?.full_name || "Unknown"}
+                      {res.profiles?.full_name || "Unknown"}
                     </p>
                     <p className="text-xs text-slate-500">
                       {new Date(res.created_at).toLocaleDateString()}

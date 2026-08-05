@@ -8,6 +8,16 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 import { createBrowserClient } from "@supabase/ssr";
 import { toast } from "sonner";
 
+type Resource = {
+  id: string;
+  name: string;
+  category: string;
+  capacity: number;
+  is_active: boolean;
+  created_at: string;
+  profiles: { full_name: string } | null;
+};
+
 interface CreateResourceModalProps {
   isOpen: boolean;
   onClose: () => void;

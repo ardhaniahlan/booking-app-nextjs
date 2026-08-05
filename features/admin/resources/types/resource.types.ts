@@ -4,6 +4,7 @@ export interface Resource {
   category: string;
   capacity: number;
   is_active: boolean;
+  created_by: string;
   created_at: string;
-  profiles: { full_name: string }[]; // jadi array
+  profiles: { full_name: string } | null;
 }
