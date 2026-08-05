@@ -5,37 +5,48 @@ import {
   ArrowLeft,
   CalendarDays,
   Clock,
+  ImageIcon,
   Plus,
   Settings,
   Trash2,
+  UploadCloud,
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { use, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
   const router = useRouter();
-  
   const params = use(props.params);
   const resourceId = params.id;
 
-  const [activeTab, setActiveTab] = useState("availability");
+  const [activeTab, setActiveTab] = useState("general");
   const [resourceName, setResourceName] = useState("Loading...");
+  const [images, setImages] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  
   const [isSaving, setIsSaving] = useState(false);
   const [rules, setRules] = useState<AvailabilityRule[]>([]);
 
+  const MAX_IMAGES = 8;
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
   );
 
   const fetchResourceAndRules = useCallback(async () => {
     const { data: resData } = await supabase
       .from("resources")
-      .select("name")
+      .select("name, image_urls") 
       .eq("id", resourceId)
       .single();
-    if (resData) setResourceName(resData.name);
+      
+    if (resData) {
+      setResourceName(resData.name);
+      setImages(resData.image_urls || []); 
+    }
 
     const { data: rulesData } = await supabase
       .from("availability_rules")
@@ -60,19 +71,95 @@ const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
     fetchResourceAndRules();
   }, [fetchResourceAndRules]);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      if (images.length + files.length > MAX_IMAGES) {
+        alert(`Maksimal ${MAX_IMAGES} foto. Anda hanya bisa menambah ${MAX_IMAGES - images.length} foto lagi.`);
+        return;
+      }
+
+      setIsUploading(true);
+      const newUploadedUrls: string[] = [];
+
+      for (const file of files) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert(`File ${file.name} terlalu besar! Maksimal 2MB.`);
+          continue; 
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${resourceId}-${Math.random()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('resource_images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: publicUrlData } = supabase.storage
+          .from('resource_images')
+          .getPublicUrl(fileName);
+
+        newUploadedUrls.push(publicUrlData.publicUrl);
+      }
+
+      const updatedImages = [...images, ...newUploadedUrls];
+
+      const { error: updateError } = await supabase
+        .from('resources')
+        .update({ image_urls: updatedImages })
+        .eq('id', resourceId);
+
+      if (updateError) throw updateError;
+
+      setImages(updatedImages);
+      
+      e.target.value = '';
+
+    } catch (error: any) {
+      console.error("Gagal mengunggah gambar:", error.message);
+      toast.error("Terjadi kesalahan saat mengunggah gambar.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteImage = async (urlToRemove: string) => {
+    if (!window.confirm("Hapus foto ini?")) return;
+
+    try {
+      const updatedImages = images.filter(url => url !== urlToRemove);
+      
+      const { error: updateError } = await supabase
+        .from('resources')
+        .update({ image_urls: updatedImages })
+        .eq('id', resourceId);
+
+      if (updateError) throw updateError;
+      setImages(updatedImages);
+
+      const urlParts = urlToRemove.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      
+      await supabase.storage.from('resource_images').remove([fileName]);
+
+    } catch (error: any) {
+      console.error("Gagal menghapus gambar:", error.message);
+      toast.error("Gagal menghapus gambar.");
+    }
+  };
+
   const handleSaveSchedules = async () => {
     setIsSaving(true);
     try {
-      await supabase
-        .from("availability_rules")
-        .delete()
-        .eq("resource_id", resourceId);
+      await supabase.from("availability_rules").delete().eq("resource_id", resourceId);
 
       const dbRulesToInsert: any[] = [];
-
       rules.forEach((rule) => {
         let days: number[] = [];
-        
         if (rule.day_of_week === "Mon-Fri") days = [1, 2, 3, 4, 5];
         else if (rule.day_of_week === "Sat-Sun") days = [6, 0];
         else if (rule.day_of_week === "Everyday") days = [0, 1, 2, 3, 4, 5, 6];
@@ -89,19 +176,15 @@ const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
       });
 
       if (dbRulesToInsert.length > 0) {
-        const { error } = await supabase
-          .from("availability_rules")
-          .insert(dbRulesToInsert);
-
+        const { error } = await supabase.from("availability_rules").insert(dbRulesToInsert);
         if (error) throw error;
       }
 
-      alert("Jadwal berhasil disimpan!");
+      toast.success("Jadwal berhasil disimpan!");
       fetchResourceAndRules();
-
     } catch (error: any) {
       console.error("Gagal menyimpan jadwal:", error.message);
-      alert("Gagal menyimpan jadwal. Cek console log.");
+      toast.error("Gagal menyimpan jadwal.");
     } finally {
       setIsSaving(false);
     }
@@ -152,6 +235,67 @@ const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
           <CalendarDays className="w-4 h-4" /> Availability
         </button>
       </div>
+
+      {activeTab === "general" && (
+        <div className="space-y-6">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800">Photo Gallery</h2>
+                <p className="text-sm text-slate-500">
+                  Upload up to {MAX_IMAGES} high-quality images. ({images.length}/{MAX_IMAGES})
+                </p>
+              </div>
+              
+              {images.length < MAX_IMAGES && (
+                <label className="cursor-pointer group">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${isUploading ? 'bg-slate-100 text-slate-400' : 'bg-[#0b3c95] text-white hover:bg-blue-800'}`}>
+                    {isUploading ? "Uploading..." : <><UploadCloud className="w-4 h-4" /> Add Photos</>}
+                  </div>
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/jpg" 
+                    multiple
+                    className="hidden" 
+                    onChange={handleImageUpload}
+                    disabled={isUploading}
+                  />
+                </label>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {images.length === 0 ? (
+                <div className="col-span-full py-12 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400">
+                  <ImageIcon className="w-12 h-12 mb-3 opacity-50" />
+                  <span className="text-sm font-semibold text-slate-500">No photos uploaded yet</span>
+                  <span className="text-xs mt-1">Supported formats: JPG, PNG. Max 2MB per file.</span>
+                </div>
+              ) : (
+                images.map((url, index) => (
+                  <div key={url} className="group relative aspect-video bg-slate-100 rounded-xl overflow-hidden border border-slate-200">
+                    <img src={url} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+                    
+                    {index === 0 && (
+                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded text-slate-800 shadow-sm">
+                        Cover
+                      </div>
+                    )}
+                    
+                    <button 
+                      onClick={() => handleDeleteImage(url)}
+                      className="absolute top-2 right-2 p-1.5 bg-white/90 hover:bg-red-50 text-red-500 rounded-lg shadow-sm opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 group-hover:translate-y-0"
+                      title="Delete photo"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {activeTab === "availability" && (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
@@ -252,12 +396,6 @@ const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
               {isSaving ? "Saving..." : "Save Schedules"}
             </button>
           </div>
-        </div>
-      )}
-
-      {activeTab === "general" && (
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500">
-          This tab can be used later to edit Name, Category, or Capacity without using the Pop-up Modal.
         </div>
       )}
     </div>
