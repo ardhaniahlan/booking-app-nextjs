@@ -5,7 +5,15 @@ import { EditResourceModal } from "@/features/admin/resources/components/EditRes
 import { Resource } from "@/features/admin/resources/types/resource.types";
 import { useDebounce } from "@/hooks/useDebounce";
 import { createBrowserClient } from "@supabase/ssr";
-import { CalendarDays, Edit, Plus, Search, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -112,6 +120,20 @@ const ResourcePage = () => {
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedResources = filteredResources.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery, filterCategory, filterStatus]);
 
   return (
     <div className="p-8 max-w-7xl mx-auto text-slate-800">
@@ -233,14 +255,14 @@ const ResourcePage = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredResources.length === 0 ? (
+              {paginatedResources.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-12 text-slate-500">
                     Tidak ada data yang cocok dengan pencarian/filter Anda.
                   </td>
                 </tr>
               ) : (
-                filteredResources.map((res) => (
+                paginatedResources.map((res) => (
                   <tr
                     key={res.id}
                     className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0"
@@ -311,6 +333,40 @@ const ResourcePage = () => {
               )}
             </tbody>
           </table>
+
+          {filteredResources.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
+              <span className="text-sm text-slate-500 font-medium">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(
+                  startIndex + ITEMS_PER_PAGE,
+                  filteredResources.length,
+                )}{" "}
+                of {filteredResources.length} entries
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
