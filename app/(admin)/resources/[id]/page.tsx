@@ -206,7 +206,7 @@ const ResourceDetailPage = (props: {params: Promise<{ id: string}>}) => {
   return (
     <div className="p-8 w-full text-slate-800">
       <button 
-        onClick={() => router.push("/admin/resources")}
+        onClick={() => router.push("/resources")}
         className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-blue-600 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Resources
