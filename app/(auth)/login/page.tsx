@@ -33,15 +33,16 @@ const LoginPage = () => {
           id: user.id,
           email: user.email!,
           full_name: user.user_metadata?.full_name, 
+          role: user.user_metadata?.role
         },
         role
       );
       router.refresh();
 
-      if (role === "admin") {
-        router.replace("/admin/dashboard");
-      } else {
+      if (role === "vendor") {
         router.replace("/dashboard");
+      } else {
+        router.replace("/explore");
       }
     } catch (error: any) {
       console.error(error.message);

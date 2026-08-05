@@ -3,10 +3,10 @@ import { User } from "../types/user.types";
 
 interface AuthState {
   user: User | null;
-  role: 'admin' | 'user' | null;
+  role: 'admin' | 'user' | 'vendor' | null;
   isAuthenticated: boolean;
 
-  setAuth: (user: User, role: 'admin' | 'user') => void;
+  setAuth: (user: User, role: 'admin' | 'user' | 'vendor') => void;
   clearAuth: () => void;
 }
 

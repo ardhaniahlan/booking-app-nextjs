@@ -8,6 +8,7 @@ const registerSchema = z.object({
   email: z.string().min(1, "Email tidak boleh kosong").email("Format email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter"),
   confirmPassword: z.string().min(1, "Konfirmasi password tidak boleh kosong"),
+  role: z.enum(["user", "vendor"])
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Password dan konfirmasi password tidak cocok",
   path: ["confirmPassword"],

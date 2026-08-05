@@ -32,8 +32,8 @@ const middleware = async (request: NextRequest) => {
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/register");
   
-  const isAdminPage = request.nextUrl.pathname.startsWith("/admin");
-  const isUserPage = request.nextUrl.pathname.startsWith("/dashboard");
+  const isAdminPage = request.nextUrl.pathname.startsWith("/dashboard");
+  const isUserPage = request.nextUrl.pathname.startsWith("/explore");
 
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone();
@@ -53,19 +53,19 @@ const middleware = async (request: NextRequest) => {
 
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = role === "admin" ? "/admin/dashboard" : "/dashboard";
+    url.pathname = role === "admin" || role === "vendor" ? "/dashboard" : "/explore";
     return NextResponse.redirect(url);
   }
 
-  if (user && isAdminPage && role !== "admin") {
+  if (user && isAdminPage && role !== "admin" && role !== "vendor") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/explore";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isUserPage && role !== "user") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isUserPage && role === "admin") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/admin/dashboard";
     return NextResponse.redirect(url);
   }
 

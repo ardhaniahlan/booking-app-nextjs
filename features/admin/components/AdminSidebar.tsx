@@ -14,11 +14,11 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store/authStore";
 
 const MENU_ITEMS = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Resources", href: "/admin/resources", icon: Archive },
-  { name: "Availability Rules", href: "/admin/rules", icon: CalendarDays },
-  { name: "All Bookings", href: "/admin/bookings", icon: ListOrdered },
-  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Resources", href: "/resources", icon: Archive },
+  { name: "Availability Rules", href: "/rules", icon: CalendarDays },
+  { name: "All Bookings", href: "/bookings", icon: ListOrdered },
+  { name: "Users", href: "/users", icon: Users },
 ];
 
 export function AdminSidebar() {
