@@ -52,8 +52,12 @@ export const CreateResourceModal = ({
 
       const { error } = await supabase.from("resources").insert({
         name: data.name,
+        description: data.description,
         category: data.category,
         capacity: data.capacity,
+        price: data.price,
+        price_unit: data.price_unit,
+        image_urls: data.image_urls || [],
         is_active: true,
         created_by: user.id,
       });
@@ -105,6 +109,18 @@ export const CreateResourceModal = ({
             )}
           </div>
 
+          <div className="flex flex-col gap-2 mb-4">
+            <label className="text-sm font-bold text-slate-700">
+              Deskripsi Lengkap
+            </label>
+            <textarea
+              {...register("description")}
+              rows={4}
+              placeholder="Jelaskan fasilitas, aturan, atau detail lainnya..."
+              className="w-full px-4 py-2 border rounded-lg resize-none"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-1">
               Category
@@ -142,6 +158,34 @@ export const CreateResourceModal = ({
                 {errors.capacity.message}
               </p>
             )}
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-sm font-bold text-slate-700">Harga</label>
+              <div className="relative">
+                <span className="absolute left-3 top-3 text-slate-500">Rp</span>
+                <input
+                  type="number"
+                  min="1"
+                  {...register("price", { valueAsNumber: true })}
+                  className="w-full pl-10 pr-4 py-2 border rounded-lg"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-2">
+              <label className="text-sm font-bold text-slate-700">Satuan</label>
+              <select
+                {...register("price_unit")}
+                className="w-full px-4 py-2 border rounded-lg"
+              >
+                <option value="hour">Per Jam (/hr)</option>
+                <option value="day">Per Hari (/day)</option>
+                <option value="session">Per Sesi</option>
+              </select>
+            </div>
           </div>
 
           <div className="pt-4 flex gap-3">

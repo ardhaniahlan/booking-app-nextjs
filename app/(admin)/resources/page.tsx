@@ -3,6 +3,7 @@
 import { CreateResourceModal } from "@/features/admin/resources/components/CreateResourceModal";
 import { EditResourceModal } from "@/features/admin/resources/components/EditResourceModal";
 import { Resource } from "@/features/admin/resources/types/resource.types";
+import { useAuthStore } from "@/features/auth/store/authStore";
 import { useDebounce } from "@/hooks/useDebounce";
 import { createBrowserClient } from "@supabase/ssr";
 import {
@@ -23,6 +24,9 @@ const ResourcePage = () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
+
+  const user = useAuthStore((state) => state.user);
+  const role = useAuthStore((state) => state.role);
 
   const [resources, setResources] = useState<Resource[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,15 +50,18 @@ const ResourcePage = () => {
   ).length;
 
   const fetchResources = async () => {
-    const { data, error } = await supabase
+    let query = supabase
       .from("resources")
-      .select(
-        `
-        id, name, category, capacity, is_active, created_by, created_at,
+      .select(`
+        id, name, description, category, capacity, price, price_unit, image_urls, is_active, created_by, created_at,
         profiles(full_name) 
-      `,
-      )
-      .order("created_at", { ascending: false });
+      `);
+
+    if (role === "vendor" && user) {
+      query = query.eq("created_by", user.id);
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
 
     console.log("Supabase Data:", data);
     console.log("Supabase Error:", error);
@@ -67,8 +74,10 @@ const ResourcePage = () => {
   };
 
   useEffect(() => {
-    fetchResources();
-  }, []);
+    if (user) {
+      fetchResources();
+    }
+  }, [user, role]);
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
     setResources(

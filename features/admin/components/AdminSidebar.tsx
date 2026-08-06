@@ -16,7 +16,6 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 const MENU_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Resources", href: "/resources", icon: Archive },
-  { name: "Availability Rules", href: "/rules", icon: CalendarDays },
   { name: "All Bookings", href: "/bookings", icon: ListOrdered },
   { name: "Users", href: "/users", icon: Users },
 ];

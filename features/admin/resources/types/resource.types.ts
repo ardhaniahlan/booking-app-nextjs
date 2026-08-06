@@ -1,8 +1,12 @@
 export interface Resource {
   id: string;
   name: string;
+  description: string;
   category: string;
   capacity: number;
+  price: number;
+  price_unit: "hour" | "day" | "session";
+  image_urls: string[];
   is_active: boolean;
   created_by: string;
   created_at: string;
