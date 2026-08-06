@@ -26,7 +26,6 @@ const ResourceDetailPage = ({
 }) => {
   const router = useRouter();
 
-  // 3. Buka (unwrap) nilai params menggunakan React.use()
   const resolvedParams = use(params);
   const resourceId = resolvedParams.id;
 
@@ -88,11 +87,9 @@ const ResourceDetailPage = ({
   const prevImage = () =>
     setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
 
-  // --- STATE UNTUK BOOKING WIDGET (Dummy Kalkulasi) ---
   const [addCatering, setAddCatering] = useState(false);
   const [addTechSupport, setAddTechSupport] = useState(false);
 
-  // --- TAMPILAN LOADING ---
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fbff]">
@@ -101,7 +98,6 @@ const ResourceDetailPage = ({
     );
   }
 
-  // --- JIKA DATA TIDAK DITEMUKAN ---
   if (!resource) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8fbff]">
@@ -118,17 +114,15 @@ const ResourceDetailPage = ({
     );
   }
 
-  // Kalkulasi Harga Asli dari DB
   const basePrice = resource.price || 0;
   const unit = resource.price_unit || "day";
-  const duration = 4; // Dummy durasi untuk sementara
+  const duration = 4;
   const subTotal = basePrice * duration;
   const addonsTotal = (addCatering ? 40 : 0) + (addTechSupport ? 25.83 : 0);
   const grandTotal = subTotal + addonsTotal;
 
   return (
     <div className="min-h-screen bg-[#f8fbff] pb-24">
-      {/* 1. HERO SECTION & IMAGE SLIDER */}
       <div className="relative h-[60vh] min-h-100 w-full bg-slate-900 group">
         <img
           src={images[currentImageIndex]}
@@ -138,7 +132,6 @@ const ResourceDetailPage = ({
 
         <div className="absolute inset-0 bg-linear-to-t from-[#f8fbff] via-transparent to-black/20"></div>
 
-        {/* Hanya tampilkan panah navigasi jika gambar lebih dari 1 */}
         {images.length > 1 && (
           <>
             <button
@@ -186,25 +179,20 @@ const ResourceDetailPage = ({
         </div>
       </div>
 
-      {/* 2. MAIN CONTENT & SIDEBAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* KOLOM KIRI */}
           <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
             <h2 className="text-2xl font-bold text-slate-900 mb-4">
               About this {resource.category || "space"}
             </h2>
 
-            {/* Render Deskripsi dari Database */}
             <p className="text-slate-600 leading-relaxed whitespace-pre-wrap">
               {resource.description ||
                 "Tidak ada deskripsi spesifik untuk layanan ini."}
             </p>
 
-            {/* Render Fasilitas Dasar yang Ada di Database */}
             <div className="grid grid-cols-2 gap-6 mt-8">
               <div className="grid grid-cols-2 gap-6 mt-8 border-t border-slate-100 pt-6">
-                {/* 1. MUNCUL JIKA ADA KAPASITAS (Workspace, Room, Vehicle) */}
                 {resource.capacity && resource.capacity > 0 ? (
                   <div className="flex items-center gap-3 text-slate-700 font-medium">
                     <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -214,7 +202,6 @@ const ResourceDetailPage = ({
                   </div>
                 ) : null}
 
-                {/* 2. MUNCUL JIKA KATEGORI EQUIPMENT / SERVICE */}
                 {(resource.category === "Equipment" ||
                   resource.category === "Service") &&
                 resource.quantity ? (
@@ -226,7 +213,6 @@ const ResourceDetailPage = ({
                   </div>
                 ) : null}
 
-                {/* 3. STATUS (Selalu Muncul untuk Semua Kategori) */}
                 <div className="flex items-center gap-3 text-slate-700 font-medium">
                   <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                     <CheckCircle className="w-5 h-5" />
@@ -240,7 +226,6 @@ const ResourceDetailPage = ({
             </div>
           </div>
 
-          {/* KOLOM KANAN (Sticky Booking Widget) */}
           <div className="w-full lg:w-1/3 relative">
             <div className="sticky top-24 bg-white p-6 sm:p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
               <div className="flex justify-between items-end mb-6">
@@ -252,7 +237,6 @@ const ResourceDetailPage = ({
                 </div>
               </div>
 
-              {/* Form Dummy ... (Dipertahankan seperti sebelumnya) */}
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">

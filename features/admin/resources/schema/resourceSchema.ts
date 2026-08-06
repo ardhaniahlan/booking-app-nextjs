@@ -9,6 +9,8 @@ const resourceSchema = z.object({
   price_unit: z.enum(["hour", "day", "session"]),
   image_urls: z.array(z.string()),
   quantity: z.number().min(1, "Minimal stok adalah 1"),
+  city: z.string().min(2, "Pilih atau isi nama kota"),
+  address: z.string().min(5, "Alamat lengkap wajib diisi"),
 });
 
 export type ResourceFormInputs = z.infer<typeof resourceSchema>;

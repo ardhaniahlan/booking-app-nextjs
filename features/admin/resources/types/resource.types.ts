@@ -12,6 +12,8 @@ export interface Resource {
   created_by: string;
   created_at: string;
   profiles: { full_name: string } | null;
+  city: string;
+  address: string;
 }
 
 export interface AvailabilityRule {

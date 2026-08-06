@@ -146,7 +146,6 @@ const ResourcePage = () => {
     setModalMode("create");
   };
 
-  // Buka modal buat edit
   const openEditModal = (resource: Resource) => {
     setEditingResource(resource);
     setModalMode("edit");
@@ -157,7 +156,6 @@ const ResourcePage = () => {
     setEditingResource(null);
   };
 
-  // Handler CREATE
   const handleCreate = async (data: ResourceFormInputs) => {
     if (!user) {
       toast.error("Anda harus login untuk membuat resource");
@@ -173,13 +171,15 @@ const ResourcePage = () => {
       price: data.price,
       price_unit: data.price_unit,
       image_urls: data.image_urls || [],
+      city: data.city,
+      address: data.address,
       is_active: true,
       created_by: user.id,
     });
 
     if (error) {
       toast.error("Gagal menyimpan: " + error.message);
-      return; // penting: jangan lanjut close modal kalau gagal
+      return;
     }
 
     toast.success("Resource berhasil dibuat");
@@ -187,7 +187,6 @@ const ResourcePage = () => {
     fetchResources();
   };
 
-  // Handler UPDATE
   const handleUpdate = async (data: ResourceFormInputs) => {
     if (!editingResource) return;
 
@@ -202,6 +201,8 @@ const ResourcePage = () => {
         price: data.price,
         price_unit: data.price_unit,
         image_urls: data.image_urls,
+        city: data.city,
+        address: data.address,
       })
       .eq("id", editingResource.id)
       .select();

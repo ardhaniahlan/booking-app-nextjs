@@ -70,6 +70,8 @@ const ResourceFormModal = ({
       price: undefined,
       price_unit: "hour",
       image_urls: [],
+      city: "",
+      address: "",
     },
   });
 
@@ -88,6 +90,8 @@ const ResourceFormModal = ({
         price: resource.price,
         price_unit: resource.price_unit,
         image_urls: resource.image_urls ?? [],
+        city: resource.city,
+        address: resource.address,
       });
     }
     if (mode === "create" && isOpen) {
@@ -100,6 +104,8 @@ const ResourceFormModal = ({
         price: undefined,
         price_unit: "hour",
         image_urls: [],
+        city: "",
+        address: "",
       });
     }
   }, [mode, resource, isOpen, reset]);
@@ -302,6 +308,46 @@ const ResourceFormModal = ({
                       <option value="day">Per hari</option>
                       <option value="session">Per sesi</option>
                     </select>
+                  </div>
+                </div>
+                <div className="pt-4 mt-4 border-t border-slate-100">
+                  <h4 className="text-sm font-bold text-slate-800 mb-3">
+                    Lokasi / Titik Pengambilan
+                  </h4>
+                  <div className="grid grid-rows-1 md:grid-cols-2 gap-4">
+                    <div className="flex-1 flex flex-col gap-1.5 md:col-span-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        Kota
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Jakarta Selatan, Bandung, dll"
+                        {...register("city")}
+                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
+                      />
+                      {errors.city && (
+                        <p className="text-xs text-red-500">
+                          {errors.city.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex-1 flex flex-col gap-1.5 md:col-span-2">
+                      <label className="text-sm font-semibold text-slate-700">
+                        Alamat Lengkap
+                      </label>
+                      <textarea
+                        {...register("address")}
+                        rows={2}
+                        placeholder="Nama Gedung, Nama Jalan, Patokan..."
+                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 transition"
+                      />
+                      {errors.address && (
+                        <p className="text-xs text-red-500">
+                          {errors.address.message}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
