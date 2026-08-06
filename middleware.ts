@@ -31,11 +31,14 @@ const middleware = async (request: NextRequest) => {
   const isAuthPage =
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/register");
-  
-  const isAdminPage = request.nextUrl.pathname.startsWith("/dashboard");
-  const isUserPage = request.nextUrl.pathname.startsWith("/explore");
 
-  if (!user && !isAuthPage) {
+  const isAdminPage = request.nextUrl.pathname.startsWith("/dashboard");
+
+  const isPublicPage =
+    request.nextUrl.pathname.startsWith("/explore") ||
+    request.nextUrl.pathname === "/";
+
+  if (!user && !isAuthPage && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -60,12 +63,6 @@ const middleware = async (request: NextRequest) => {
   if (user && isAdminPage && role !== "admin" && role !== "vendor") {
     const url = request.nextUrl.clone();
     url.pathname = "/explore";
-    return NextResponse.redirect(url);
-  }
-
-  if (user && isUserPage && role !== "user") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
