@@ -63,7 +63,7 @@ export default function UserNavbar() {
     <nav className="sticky top-0 z-50 w-full bg-[#f8fbff] border-b border-slate-200/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/explore" className="flex items-center gap-3">
             <div className="w-8 h-8 bg-[#1a4b9c] rounded-full flex items-center justify-center shadow-sm">
               <ClipboardCheck className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { CreateResourceModal } from "@/features/admin/resources/components/CreateResourceModal";
-import { EditResourceModal } from "@/features/admin/resources/components/EditResourceModal";
+import ResourceFormModal from "@/features/admin/resources/components/ResourceFormModal";
+import { ResourceFormInputs } from "@/features/admin/resources/schema/resourceSchema";
 import { Resource } from "@/features/admin/resources/types/resource.types";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -29,7 +29,7 @@ const ResourcePage = () => {
   const role = useAuthStore((state) => state.role);
 
   const [resources, setResources] = useState<Resource[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [editingResource, setEditingResource] = useState<Resource | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,9 +50,7 @@ const ResourcePage = () => {
   ).length;
 
   const fetchResources = async () => {
-    let query = supabase
-      .from("resources")
-      .select(`
+    let query = supabase.from("resources").select(`
         id, name, description, category, capacity, price, price_unit, image_urls, is_active, created_by, created_at,
         profiles(full_name) 
       `);
@@ -61,10 +59,9 @@ const ResourcePage = () => {
       query = query.eq("created_by", user.id);
     }
 
-    const { data, error } = await query.order("created_at", { ascending: false });
-
-    console.log("Supabase Data:", data);
-    console.log("Supabase Error:", error);
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("Gagal menarik data:", error.message);
@@ -144,18 +141,88 @@ const ResourcePage = () => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, filterCategory, filterStatus]);
 
+  const openCreateModal = () => {
+    setEditingResource(null);
+    setModalMode("create");
+  };
+
+  // Buka modal buat edit
+  const openEditModal = (resource: Resource) => {
+    setEditingResource(resource);
+    setModalMode("edit");
+  };
+
+  const closeModal = () => {
+    setModalMode(null);
+    setEditingResource(null);
+  };
+
+  // Handler CREATE
+  const handleCreate = async (data: ResourceFormInputs) => {
+    if (!user) {
+      toast.error("Anda harus login untuk membuat resource");
+      return;
+    }
+
+    const { error } = await supabase.from("resources").insert({
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      capacity: data.capacity,
+      quantity: data.quantity || 1,
+      price: data.price,
+      price_unit: data.price_unit,
+      image_urls: data.image_urls || [],
+      is_active: true,
+      created_by: user.id,
+    });
+
+    if (error) {
+      toast.error("Gagal menyimpan: " + error.message);
+      return; // penting: jangan lanjut close modal kalau gagal
+    }
+
+    toast.success("Resource berhasil dibuat");
+    closeModal();
+    fetchResources();
+  };
+
+  // Handler UPDATE
+  const handleUpdate = async (data: ResourceFormInputs) => {
+    if (!editingResource) return;
+
+    const { error } = await supabase
+      .from("resources")
+      .update({
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        capacity: data.capacity,
+        quantity: data.quantity,
+        price: data.price,
+        price_unit: data.price_unit,
+        image_urls: data.image_urls,
+      })
+      .eq("id", editingResource.id)
+      .select();
+
+    if (error) {
+      toast.error("Gagal mengupdate: " + error.message);
+      return;
+    }
+
+    toast.success("Resource berhasil diupdate");
+    closeModal();
+    fetchResources();
+  };
+
   return (
     <div className="p-8 max-w-7xl mx-auto text-slate-800">
-      <CreateResourceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchResources}
-      />
-
-      <EditResourceModal
-        isOpen={!!editingResource}
-        onClose={() => setEditingResource(null)}
-        onSuccess={fetchResources}
+      <ResourceFormModal
+        mode={modalMode ?? "create"}
+        isOpen={modalMode !== null}
+        onClose={closeModal}
+        onSubmit={modalMode === "create" ? handleCreate : handleUpdate}
         resource={editingResource}
       />
 
@@ -204,14 +271,13 @@ const ResourcePage = () => {
           </select>
 
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={openCreateModal}
             className="flex items-center gap-2 bg-[#0b3c95] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-800 transition shadow-sm"
           >
             <Plus className="w-4 h-4" /> New Resource
           </button>
         </div>
       </div>
-
       <div className="flex gap-6">
         <div className="w-72 flex flex-col gap-6 shrink-0">
           <div className="bg-[#eef4ff] p-6 rounded-2xl border border-blue-100">
@@ -322,7 +388,7 @@ const ResourcePage = () => {
                           <CalendarDays className="w-4 h-4" />
                         </Link>
                         <button
-                          onClick={() => setEditingResource(res)}
+                          onClick={() => openEditModal(res)}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
                           title="Edit Resource"
                         >

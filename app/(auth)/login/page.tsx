@@ -39,7 +39,7 @@ const LoginPage = () => {
       );
       router.refresh();
 
-      if (role === "vendor") {
+      if (role === "vendor" || role === "admin") {
         router.replace("/dashboard");
       } else {
         router.replace("/explore");

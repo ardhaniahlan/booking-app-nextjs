@@ -4,6 +4,7 @@ export interface Resource {
   description: string;
   category: string;
   capacity: number;
+  quantity: number;
   price: number;
   price_unit: "hour" | "day" | "session";
   image_urls: string[];

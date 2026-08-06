@@ -8,6 +8,7 @@ const resourceSchema = z.object({
   price: z.number().min(0, "Harga tidak boleh kurang dari 0"),
   price_unit: z.enum(["hour", "day", "session"]),
   image_urls: z.array(z.string()),
+  quantity: z.number().min(1, "Minimal stok adalah 1"),
 });
 
 export type ResourceFormInputs = z.infer<typeof resourceSchema>;

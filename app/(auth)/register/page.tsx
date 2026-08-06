@@ -42,7 +42,7 @@ const RegisterPage = () => {
 
       router.refresh();
 
-      if (data.role === "vendor") {
+      if (data.role === "vendor" || data.role === "admin") {
         router.replace("/dashboard");
       } else {
         router.replace("/login");
