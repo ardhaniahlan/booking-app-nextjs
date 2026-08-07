@@ -7,6 +7,7 @@ import { IncompleteProfileModal } from "@/features/user/components/IncompleteBoo
 import { ResourceInfoCard } from "@/features/user/components/ResourceInfoCard";
 import { useBookingCalculator } from "@/features/user/hooks/useBookingCalculator";
 import { useResourceDetail } from "@/features/user/hooks/useResourceDetail";
+import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, MapPin, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
@@ -20,8 +21,12 @@ const ResourceDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
   const resolvedParams = use(params);
   const resourceId = resolvedParams.id;
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const { user } = useAuthStore();
-  const [showIncompleteProfileModal, setShowIncompleteProfileModal] = useState(false);
 
   const { resource, isLoading } = useResourceDetail(resourceId);
   const booking = useBookingCalculator(resource);
@@ -47,22 +52,58 @@ const ResourceDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
 
   const images = resource.image_urls?.length > 0 ? resource.image_urls : [FALLBACK_IMAGE];
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
     if (!user) {
       router.push(`/auth/login?next=/explore/${resourceId}`);
       return;
     }
 
-    const needsStrictProfile = ["Equipment", "Vehicle"].includes(resource?.category);
-    const hasAddress = user.user_metadata?.address;
-    const hasPhone = user.user_metadata?.phone_number;
+    console.log("1. Tombol ditekan. Memulai proses...");
+    console.log("Data booking saat ini:", booking);
 
-    if (needsStrictProfile && (!hasAddress || !hasPhone)) {
-      setShowIncompleteProfileModal(true);
-      return;
+    try {
+      let startTimestamp, endTimestamp;
+      const { startDate, endDate, startTime, endTime, isHourly, isDaily, orderQuantity, grandTotal } = booking;
+
+      if (isHourly || booking.isSessionBased) {
+        startTimestamp = new Date(`${startDate}T${startTime.toString().padStart(2, '0')}:00:00`).toISOString();
+        endTimestamp = new Date(`${startDate}T${endTime.toString().padStart(2, '0')}:00:00`).toISOString();
+      } else if (isDaily) {
+        startTimestamp = new Date(`${startDate}T14:00:00`).toISOString();
+        endTimestamp = new Date(`${endDate}T12:00:00`).toISOString();
+      }
+
+      console.log("2. Timestamp berhasil dibuat:", { startTimestamp, endTimestamp });
+
+      console.log("3. Mengirim data ke Supabase...");
+      const { data: bookingData, error } = await supabase
+        .from("bookings")
+        .insert({
+          resource_id: resourceId,
+          user_id: user.id,
+          start_date: startTimestamp,
+          end_date: endTimestamp,
+          quantity: orderQuantity || 1,
+          total_price: grandTotal,
+          status: "pending"
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("ERROR DARI SUPABASE:", error);
+        throw error;
+      }
+
+      console.log("4. Berhasil masuk database! ID Booking:", bookingData.id);
+
+      console.log("5. Mengarahkan ke halaman checkout...");
+      router.push(`/checkout/${bookingData.id}`);
+
+    } catch (error: any) {
+      console.error("GAGAL TOTAL:", error.message || error);
+      alert(`Gagal: ${error.message || "Terjadi kesalahan sistem"}`);
     }
-
-    router.push(`/checkout/${resourceId}`);
   };
 
   return (
@@ -109,13 +150,6 @@ const ResourceDetailPage = ({ params }: { params: Promise<{ id: string }> }) => 
           </div>
         </div>
       </div>
-
-      <IncompleteProfileModal
-        isOpen={showIncompleteProfileModal}
-        category={resource.category}
-        onClose={() => setShowIncompleteProfileModal(false)}
-        onComplete={() => router.push("/profile/edit")}
-      />
     </div>
   );
 };

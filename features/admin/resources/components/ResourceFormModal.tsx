@@ -72,6 +72,7 @@ const ResourceFormModal = ({
       image_urls: [],
       city: "",
       address: "",
+      is_active: true,
     },
   });
 
@@ -90,8 +91,9 @@ const ResourceFormModal = ({
         price: resource.price,
         price_unit: resource.price_unit,
         image_urls: resource.image_urls ?? [],
-        city: resource.city,
-        address: resource.address,
+        city: resource.city ?? "",
+        address: resource.address ?? "",
+        is_active: resource.is_active ?? true,
       });
     }
     if (mode === "create" && isOpen) {
@@ -219,6 +221,27 @@ const ResourceFormModal = ({
                       {errors.name.message}
                     </p>
                   )}
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl mt-4">
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    {...register("is_active")}
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                  />
+                  <div>
+                    <label
+                      htmlFor="is_active"
+                      className="font-bold text-slate-800 cursor-pointer"
+                    >
+                      Resource Aktif
+                    </label>
+                    <p className="text-xs text-slate-500">
+                      Matikan jika aset sedang rusak, direnovasi, atau tidak
+                      ingin disewakan sementara waktu.
+                    </p>
+                  </div>
                 </div>
 
                 <div>

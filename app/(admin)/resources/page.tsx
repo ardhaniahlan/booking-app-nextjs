@@ -51,7 +51,7 @@ const ResourcePage = () => {
 
   const fetchResources = async () => {
     let query = supabase.from("resources").select(`
-        id, name, description, category, capacity, price, price_unit, image_urls, is_active, created_by, created_at,
+        id, name, description, category, capacity, price, price_unit, image_urls, is_active, created_by, created_at, city, address,
         profiles(full_name) 
       `);
 

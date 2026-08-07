@@ -11,6 +11,7 @@ const resourceSchema = z.object({
   quantity: z.number().min(1, "Minimal stok adalah 1"),
   city: z.string().min(2, "Pilih atau isi nama kota"),
   address: z.string().min(5, "Alamat lengkap wajib diisi"),
+  is_active: z.boolean()
 })
   .superRefine((data, ctx) => {
     const needsCapacity = data.category === "Workspace" || data.category === "Vehicle";
