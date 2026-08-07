@@ -7,6 +7,9 @@ interface AuthState {
   user_metadata?: {
     avatar_url?: string;
     full_name?: string;
+    city?: string;
+    address?: string;
+    phone_number?: string;
     [key: string]: any;
   };
   isAuthenticated: boolean;

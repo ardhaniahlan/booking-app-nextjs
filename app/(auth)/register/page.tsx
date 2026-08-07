@@ -18,11 +18,17 @@ const RegisterPage = () => {
 
   const {
     register,
+    watch,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      role: "user",
+    },
   });
+
+  const selectedRole = watch("role");
 
   const onSubmit = async (data: RegisterFormInputs) => {
     try {
@@ -35,6 +41,7 @@ const RegisterPage = () => {
             email: authData.user.email!,
             full_name: data.fullName,
             role: data.role,
+            phone_number: data.phoneNumber,
           },
           data.role,
         );
@@ -138,26 +145,58 @@ const RegisterPage = () => {
           error={errors.email}
         />
 
-        <InputField
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          registration={register("password")}
-          error={errors.password}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            registration={register("password")}
+            error={errors.password}
+          />
 
-        <InputField
-          label="Confirm Password"
-          type="password"
-          placeholder="••••••••"
-          registration={register("confirmPassword")}
-          error={errors.confirmPassword}
-        />
+          <InputField
+            label="Confirm Password"
+            type="password"
+            placeholder="••••••••"
+            registration={register("confirmPassword")}
+            error={errors.confirmPassword}
+          />
+        </div>
+
+        {selectedRole === "vendor" && (
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+            <InputField
+              label="Nomor Telepon Bisnis (Wajib)"
+              type="tel"
+              placeholder="0812-3456-7890"
+              registration={register("phoneNumber", {
+                onChange: (e) => {
+                  const rawValue = e.target.value.replace(/\D/g, "");
+
+                  let formattedValue = rawValue.replace(
+                    /(\d{4})(?=\d)/g,
+                    "$1-",
+                  );
+
+                  if (formattedValue.length > 16) {
+                    formattedValue = formattedValue.slice(0, 16);
+                  }
+
+                  e.target.value = formattedValue;
+                },
+              })}
+              error={errors.phoneNumber}
+            />
+            <p className="text-xs text-blue-700 mt-2 font-medium">
+              * Dibutuhkan untuk komunikasi penyewaan aset Anda.
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 mt-6"
+          className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex justify-center items-center gap-2 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Signing Up..." : "Sign Up"}
         </button>

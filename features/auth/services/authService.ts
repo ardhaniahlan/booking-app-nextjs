@@ -36,6 +36,7 @@ export const authService = {
       options: {
         data: {
           full_name: data.fullName,
+          phone_number: data.phoneNumber,
           role: data.role
         },
       },
