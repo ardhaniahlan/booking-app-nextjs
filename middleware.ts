@@ -32,11 +32,17 @@ const middleware = async (request: NextRequest) => {
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/register");
 
-  const isAdminPage = request.nextUrl.pathname.startsWith("/dashboard");
+  const adminPaths = ["/dashboard", "/resources", "/booking", "/admin-profile"];
+  const isAdminPage = adminPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path),
+  );
 
-  const isPublicPage =
-    request.nextUrl.pathname.startsWith("/explore") ||
-    request.nextUrl.pathname === "/";
+  const userPaths = ["/explore", "/checkout", "/mybooking", "/profile"];
+  const isUserPage = userPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path),
+  );
+
+  const isPublicPage = request.nextUrl.pathname === "/";
 
   if (!user && !isAuthPage && !isPublicPage) {
     const url = request.nextUrl.clone();
@@ -56,13 +62,20 @@ const middleware = async (request: NextRequest) => {
 
   if (user && isAuthPage) {
     const url = request.nextUrl.clone();
-    url.pathname = role === "admin" || role === "vendor" ? "/dashboard" : "/explore";
+    url.pathname =
+      role === "admin" || role === "vendor" ? "/dashboard" : "/explore";
     return NextResponse.redirect(url);
   }
 
   if (user && isAdminPage && role !== "admin" && role !== "vendor") {
     const url = request.nextUrl.clone();
     url.pathname = "/explore";
+    return NextResponse.redirect(url);
+  }
+
+  if (user && isUserPage && (role === "admin" || role === "vendor")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

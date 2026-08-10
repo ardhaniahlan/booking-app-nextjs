@@ -17,7 +17,7 @@ const MENU_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Resources", href: "/resources", icon: Archive },
   { name: "All Bookings", href: "/booking", icon: ListOrdered },
-  { name: "Users", href: "/users", icon: Users },
+  { name: "Profile", href: "/admin-profile", icon: Users },
 ];
 
 export function AdminSidebar() {
