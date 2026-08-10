@@ -3,6 +3,7 @@ import { useBookingCalculator } from "../hooks/useBookingCalculator";
 import { SessionBookingForm } from "./SessionBookingForm";
 import { HourlyBookingForm } from "./HourlyBookingForm";
 import { DailyBookingForm } from "./DailyBookingForm";
+import { useState } from "react";
 
 interface BookingWidgetProps {
   booking: ReturnType<typeof useBookingCalculator>;
