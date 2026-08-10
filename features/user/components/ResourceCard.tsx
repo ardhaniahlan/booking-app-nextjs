@@ -102,7 +102,7 @@ const ResourceCard = ({
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-slate-900">
-                ${price}
+                Rp {price}
               </span>
               <span className="text-sm font-medium text-slate-500">
                 {priceUnit}
