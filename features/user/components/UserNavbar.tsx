@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 
 const NAV_LINKS = [
   { label: "Explore", href: "/explore" },
-  { label: "My Bookings", href: "/bookings" },
+  { label: "My Bookings", href: "/mybooking" },
   { label: "Profile", href: "/profile" },
 ] as const;
 
