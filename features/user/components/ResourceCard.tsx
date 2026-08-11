@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Star, Users, Package } from "lucide-react";
+import ToggleFavorite from "./ToggleFavorite";
 
 interface ResourceCardProps {
   id: string;
@@ -29,7 +32,10 @@ const ResourceCard = ({
   isActive,
 }: ResourceCardProps) => {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group">
+    <Link
+      href={`/explore/${id}`}
+      className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
+    >
       <div className="relative h-56 w-full bg-slate-100 overflow-hidden">
         <img
           src={imageUrl}
@@ -46,21 +52,12 @@ const ResourceCard = ({
           </span>
         </div>
 
-        <button className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur-sm rounded-full text-slate-400 hover:text-red-500 hover:scale-110 transition-all shadow-sm">
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            ></path>
-          </svg>
-        </button>
+        <div className="absolute top-3 right-3 z-10">
+          <ToggleFavorite
+            resourceId={id}
+            className="w-10 h-10 p-2.5 bg-white/80 backdrop-blur-md rounded-full shadow-sm hover:bg-white flex items-center justify-center"
+          />
+        </div>
       </div>
 
       <div className="p-5 flex flex-col flex-1">
@@ -110,15 +107,14 @@ const ResourceCard = ({
             </div>
           </div>
 
-          <Link
-            href={`/explore/${id}`}
+          <div
             className="px-5 py-2.5 bg-[#f0f4ff] text-blue-700 font-bold text-sm rounded-xl hover:bg-blue-600 hover:text-white transition-colors flex items-center gap-2"
           >
             Book <ArrowRight className="w-4 h-4" />
-          </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

@@ -37,7 +37,7 @@ const middleware = async (request: NextRequest) => {
     request.nextUrl.pathname.startsWith(path),
   );
 
-  const userPaths = ["/explore", "/checkout", "/mybooking", "/profile"];
+  const userPaths = ["/explore", "/checkout", "/mybooking", "/profile", "/favorites"];
   const isUserPage = userPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path),
   );
