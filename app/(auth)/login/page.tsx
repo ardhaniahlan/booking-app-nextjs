@@ -52,8 +52,8 @@ const LoginPage = () => {
 
   return (
     <AuthForm
-      title="Welcome back"
-      subtitle="Sign in to manage your bookings and preferences."
+      title="Selamat Datang"
+      subtitle="Masuk untuk mengelola pesanan Anda."
       icon={
         <svg
           className="w-6 h-6"
@@ -69,8 +69,8 @@ const LoginPage = () => {
           />
         </svg>
       }
-      footerText="Don't have an account?"
-      footerLinkText="Sign up now"
+      footerText="Belum punya akun?"
+      footerLinkText="Daftar sekarang"
       footerLinkHref="/register"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

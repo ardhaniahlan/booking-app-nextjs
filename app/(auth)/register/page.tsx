@@ -64,8 +64,8 @@ const RegisterPage = () => {
 
   return (
     <AuthForm
-      title="Create an Account"
-      subtitle="Join BookingApp to easily manage your reservations and preferences."
+      title="Buat Akun"
+      subtitle="Bergabunglah dengan BookingApp untuk mengelola pesanan Anda."
       icon={
         <svg
           className="w-6 h-6"
@@ -81,8 +81,8 @@ const RegisterPage = () => {
           />
         </svg>
       }
-      footerText="Already have an account?"
-      footerLinkText="Sign in now"
+      footerText="Sudah punya akun?"
+      footerLinkText="Masuk sekarang"
       footerLinkHref="/login"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
