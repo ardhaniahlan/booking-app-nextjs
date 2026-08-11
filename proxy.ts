@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-const middleware = async (request: NextRequest) => {
+const proxy = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -90,4 +90,4 @@ export const config = {
   ],
 };
 
-export default middleware;
+export default proxy;
