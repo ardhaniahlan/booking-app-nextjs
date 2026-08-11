@@ -42,7 +42,9 @@ const middleware = async (request: NextRequest) => {
     request.nextUrl.pathname.startsWith(path),
   );
 
-  const isPublicPage = request.nextUrl.pathname === "/";
+  const isPublicPage = 
+    request.nextUrl.pathname === "/" || 
+    request.nextUrl.pathname.startsWith("/explore");
 
   if (!user && !isAuthPage && !isPublicPage) {
     const url = request.nextUrl.clone();
