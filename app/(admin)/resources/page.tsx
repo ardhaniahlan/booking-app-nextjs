@@ -166,7 +166,7 @@ const ResourcePage = () => {
       name: data.name,
       description: data.description,
       category: data.category,
-      capacity: data.capacity,
+      capacity: data.capacity || 0, 
       quantity: data.quantity || 1,
       price: data.price,
       price_unit: data.price_unit,
@@ -175,6 +175,7 @@ const ResourcePage = () => {
       address: data.address,
       is_active: true,
       created_by: user.id,
+      user_id: user.id, 
     });
 
     if (error) {

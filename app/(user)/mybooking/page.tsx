@@ -9,10 +9,11 @@ import {
   Clock,
   Clock3,
   MapPin,
-  Phone,
   Receipt,
   X,
   XCircle,
+  Loader2, 
+  MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -21,6 +22,8 @@ const MyBookingPage = () => {
   const [bookings, setBookings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"upcoming" | "past">("upcoming");
+  
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,9 +41,8 @@ const MyBookingPage = () => {
           .select(
             `
             *,
-            resources ( id, name, category, image_urls )
-          `,
-          )
+            resources ( id, name, category, image_urls, user_id ) 
+          `)
           .eq("user_id", user.id)
           .order("start_date", { ascending: true });
 
@@ -77,6 +79,52 @@ const MyBookingPage = () => {
     } catch (error) {
       console.error("Gagal membatalkan:", error);
       alert("Gagal membatalkan pesanan.");
+    }
+  };
+
+  const handleChatVendor = async () => {
+    if (!selectedBooking?.resources?.user_id) {
+      alert("Data vendor tidak ditemukan.");
+      return;
+    }
+
+    setIsChatLoading(true);
+    try {
+      const vendorId = selectedBooking.resources.user_id;
+      
+      const { data: vendorData, error } = await supabase
+        .from("profiles")
+        .select("phone_number, full_name")
+        .eq("id", vendorId)
+        .single();
+
+      if (error) throw error;
+
+      if (!vendorData?.phone_number) {
+        alert("Maaf, vendor ini belum mencantumkan nomor WhatsApp.");
+        return;
+      }
+
+      let phone = vendorData.phone_number.replace(/\D/g, "");
+      if (phone.startsWith("0")) {
+        phone = "62" + phone.substring(1);
+      } else if (!phone.startsWith("62")) {
+        phone = "62" + phone;
+      }
+
+      const bookingIdShort = `#BK-${selectedBooking.id.split("-")[0].toUpperCase()}`;
+      const message = encodeURIComponent(
+        `Halo ${vendorData.full_name}, saya adalah penyewa untuk pesanan ${bookingIdShort} ("${selectedBooking.resources.name}"). Saya ingin bertanya mengenai pesanan saya.`
+      );
+
+      const waUrl = `https://wa.me/${phone}?text=${message}`;
+      window.open(waUrl, "_blank");
+
+    } catch (error) {
+      console.error("Gagal mendapatkan kontak vendor:", error);
+      alert("Terjadi kesalahan sistem saat mencoba menghubungi vendor.");
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -347,25 +395,29 @@ const MyBookingPage = () => {
 
               <div className="bg-slate-50 p-4 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
-                    <Phone className="w-4 h-4" />
+                  <div className="w-10 h-10 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500">
                       Hubungi Vendor
                     </p>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-bold text-slate-900">
                       Tersedia via WhatsApp
                     </p>
                   </div>
                 </div>
+                
                 <button
-                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-slate-100 transition"
-                  onClick={() =>
-                    alert("Fitur chat vendor sedang dalam pengembangan")
-                  }
+                  disabled={isChatLoading}
+                  onClick={handleChatVendor}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-[#25D366] text-white text-sm font-bold rounded-xl hover:bg-[#20bd5a] disabled:bg-green-400 transition shadow-sm"
                 >
-                  Chat
+                  {isChatLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Chat"
+                  )}
                 </button>
               </div>
             </div>

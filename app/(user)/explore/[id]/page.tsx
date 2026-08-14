@@ -329,7 +329,7 @@ const ResourceDetailPage = ({
                     value={phoneNumber}
                     onChange={(e) =>
                       setPhoneNumber(e.target.value.replace(/[^0-9]/g, ""))
-                    } // Hanya terima angka
+                    } 
                     className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none text-slate-900 font-medium transition"
                   />
                 </div>
